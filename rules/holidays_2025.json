@@ -1,0 +1,8 @@
+[
+  {"date":"2025-01-01","label":"元旦","kind":"public_holiday"},
+  {"date":"2025-01-29","label":"農曆新年初一","kind":"public_holiday"},
+  {"date":"2025-01-30","label":"農曆新年初二","kind":"public_holiday"},
+  {"date":"2025-01-31","label":"農曆新年初三","kind":"public_holiday"},
+  {"date":"2025-04-04","label":"清明節","kind":"public_holiday"},
+  {"date":"2025-12-25","label":"聖誕節","kind":"public_holiday"}
+]
