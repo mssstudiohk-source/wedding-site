@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     // 無參數：只回基本資料（永遠 200）
     if (!req.query || !("test" in req.query)) {
       return res.status(200).json({
-        ok: true, ver: "b-v3",
+        ok: true, ver: "sisi3-v3",
         base, url,
         tip: "加 ?test=1 會嘗試抓 /rules/traditions.json"
       });
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     // 檢查 runtime 是否有 fetch
     if (typeof fetch !== "function") {
       return res.status(200).json({
-        ok: false, ver: "b-v3", base, url,
+        ok: false, ver: "sisi3-v3", base, url,
         note: "fetch not available in this runtime"
       });
     }
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       txt = await r.text();
     } catch (e) {
       return res.status(200).json({
-        ok: false, ver: "b-v3", base, url,
+        ok: false, ver: "sisi3-v3", base, url,
         fetchError: String(e)
       });
     }
