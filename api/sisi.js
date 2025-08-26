@@ -1,5 +1,5 @@
-// api/sisi.js  (v1)
+// v2
 export default function handler(req, res) {
-  const q = (req.query.question || "").trim();
-  res.status(200).json({ ok: true, v: 1, q });
+  const base = process.env.RULES_BASE_URL || null;
+  res.status(200).json({ ok: true, v: 2, base_present: !!base });
 }
