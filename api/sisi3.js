@@ -1,4 +1,4 @@
-// api/b.js — Step 3: 安全 fetch /rules/traditions.json（不會 500）
+// api/sisi3.js — Step 3: 安全 fetch /rules/traditions.json（不會 500）
 export default async function handler(req, res) {
   try {
     const h = req && req.headers ? req.headers : {};
