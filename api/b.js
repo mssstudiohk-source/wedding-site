@@ -1,8 +1,17 @@
 export default function handler(req, res) {
-  const h = req.headers || {};
-  const proto = String(h["x-forwarded-proto"] || "https").split(",")[0];
-  const host  = String(h["x-forwarded-host"] || h.host || "").split(",")[0];
-  const base  = ${proto}://${host};
-  const url   = $[base]/rules/traditions.json;
-  res.status(200).json({ ok: true, base, url, ver: "b-v1"});
+  try {
+    const h = req && req.headers ? req.headers : {};
+    const protoRaw = (h["x-forwarded-proto"] || "https") + "";
+    const hostRaw  = (h["x-forwarded-host"]  || h.host || "") + "";
+
+    const proto = protoRaw.split(",")[0];
+    const host  = hostRaw.split(",")[0];
+
+    const base = (proto ? proto : "https") + "://" + host;
+    const url  = base + "/rules/traditions.json";
+
+    res.status(200).json({ ok: true, ver: "b-v2", proto, host, base, url });
+  } catch (e) {
+    res.status(200).json({ ok: false, ver: "b-v2", error: String(e) });
+  }
 }
