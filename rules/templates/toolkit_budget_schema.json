@@ -1,0 +1,21 @@
+{
+  "currency": "HKD",
+  "categories": [
+    {
+      "id": "venue",
+      "label_zh": "場地",
+      "items": [
+        {
+          "key": "venue_deposit",
+          "label_zh": "訂金",
+          "type": "number"
+        },
+        {
+          "key": "venue_balance",
+          "label_zh": "尾數",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}
