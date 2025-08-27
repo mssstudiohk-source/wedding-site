@@ -50,15 +50,31 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: false, where: "parse", error: String(e), preview: txt.slice(0, 160) });
     }
 
-    // 命中關鍵字
-    const keys = ["過大禮", "安床", "回門"];
-    const hit = keys.find(k => q.includes(k));
-    if (hit && data && typeof data === "object" && data[hit]) {
-      const t = data[hit] || {};
-      const details = Array.isArray(t.details) && t.details.length ? ("\n- " + t.details.join("\n- ")) : "";
-      const notes = t.notes ? ("\n\n備註：" + t.notes) : "";
-      return res.status(200).json({ ok: true, answer: "重點：" + (t.summary || "") + details + notes });
-    }
+// 命中關鍵字
+const keys = ["過大禮", "安床", "上頭", "回門"];
+const hit = keys.find(k => q.includes(k));
+if (hit && data && typeof data === "object" && data[hit]) {
+  const t = data[hit] || {};
+
+  // 同時相容 _zh 及無後綴鍵
+  const pick = (obj, key) => obj?.[key + "_zh"] ?? obj?.[key] ?? "";
+  const pickList = (obj, key) =>
+    Array.isArray(obj?.[key + "_zh"]) ? obj[key + "_zh"]
+    : Array.isArray(obj?.[key])      ? obj[key]
+    : [];
+
+  const summary = pick(t, "summary");
+  const detailsArr = pickList(t, "details");
+  const notes = pick(t, "notes");
+
+  const detailsTxt = detailsArr.length ? ("\n- " + detailsArr.join("\n- ")) : "";
+  const notesTxt   = notes ? ("\n\n備註：" + notes) : "";
+
+  return res.status(200).json({
+    ok: true,
+    answer: "重點：" + summary + detailsTxt + notesTxt
+  });
+}
 
     // 未命中 → 提示
     return res.status(200).json({
