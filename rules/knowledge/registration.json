@@ -1,0 +1,21 @@
+{
+  "types": [
+    {
+      "id": "gov_office",
+      "name_zh": "婚姻登記處",
+      "price_hkd": 715
+    },
+    {
+      "id": "licensed_offsite",
+      "name_zh": "外證婚（持牌人）",
+      "price_hkd": 2500
+    }
+  ],
+  "steps_zh": [
+    "網上預約",
+    "提交擬結婚通知書",
+    "證婚",
+    "領取結婚證書"
+  ],
+  "notes_zh": "官方費用以政府最新公佈為準。"
+}
