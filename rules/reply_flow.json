@@ -26,4 +26,26 @@
       "tip_if_true": "戶外注意天氣及備選方案（雨備）"
     }
   }
+  {
+  "flows": [
+    {
+      "id": "tradition",
+      "keywords": ["過大禮","安床","上頭","回門"],
+      "source": "traditions/traditions.json",
+      "template": "tradition_zh"
+    },
+    {
+      "id": "makeup_vendors",
+      "keywords": ["化妝師","MUA"],
+      "source": "vendors/vendors_makeup.json",
+      "template": "vendor_card_zh"
+    },
+    {
+      "id": "holiday",
+      "keywords": ["紅日","公眾假期"],
+      "source": "dates/holidays_2025.json",
+      "template": "holiday_zh"
+    }
+  ]
+}
 ]
