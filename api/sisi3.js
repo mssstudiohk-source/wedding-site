@@ -61,19 +61,39 @@ export default async function handler(req, res) {
         return out.join("\n");
       },
 
-      // 2) 化妝師：列三個卡片（按 priority 由高至低）
-      vendor_card_zh: () => {
-        const items = Array.isArray(srcRes.data?.items) ? srcRes.data.items : [];
-        if (!items.length) return "未有化妝師資料。";
-        const top = [...items].sort((a,b) => (b.priority||0)-(a.priority||0)).slice(0,3);
-        return top.map(v =>
-          `【${v.name}】` +
-          (v.desc ? `\n— 風格：${v.desc}` : "") +
-          (v.price_from ? `\n— 起價：約 $${v.price_from}` : "") +
-          (v.url ? `\n— 連結：${v.url}` : "")
-        ).join("\n\n");
-      },
+// 2) 化妝師：列三個卡片（支援 {items:[...]} 或直接 [...])
+vendor_card_zh: () => {
+  // 支援兩種根節點：
+  //   A) { "items": [ {...}, {...} ] }
+  //   B) [ {...}, {...} ]
+  const raw = srcRes.data;
+  const items = Array.isArray(raw) ? raw
+              : (Array.isArray(raw?.items) ? raw.items : []);
 
+  if (!items.length) return "未有化妝師資料。";
+
+  // 兼容不同欄位名
+  const pick = (obj, ...cands) => cands.find(k => obj?.[k] !== undefined) ? obj[cands.find(k => obj?.[k] !== undefined)] : undefined;
+
+  // 依 priority（愈大愈優先）排序
+  const top = [...items]
+    .sort((a,b) => (Number(pick(b,"priority","weight","score"))||0) - (Number(pick(a,"priority","weight","score"))||0))
+    .slice(0,3);
+
+  return top.map(v => {
+    const name  = pick(v,"name","title","brand") || "未命名";
+    const desc  = pick(v,"desc","description","style");
+    const price = pick(v,"price_from","start_from","price","min_price");
+    const url   = pick(v,"url","link","website");
+
+    return [
+      `【${name}】`,
+      desc  ? `— 風格：${desc}` : null,
+      price ? `— 起價：約 $${price}` : null,
+      url   ? `— 連結：${url}` : null,
+    ].filter(Boolean).join("\n");
+  }).join("\n\n");
+},
       // 3) 2025 紅日：列出最近三個
       holiday_zh: () => {
         const list = Array.isArray(srcRes.data) ? srcRes.data : [];
