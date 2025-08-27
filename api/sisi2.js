@@ -171,14 +171,14 @@ export default async function handler(req, res) {
   }
 }
 
-/* ------------------ 內部輸出工具 ------------------ */
+/* 內部輸出工具 --------------------------------- */
 function out({ res, wantText, ...payload }) {
   if (wantText) {
-    // 🔹 設定 header，確保分行會顯示
+    // 讓瀏覽器用純文字模式顯示，\n 會變成換行
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     return res.status(200).send(payload.answer || "");
   }
 
-  // JSON 輸出
+  // JSON 模式（預設）
   return res.status(200).json(payload);
 }
