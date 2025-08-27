@@ -1,5 +1,8 @@
 {
   "default_tone": "formal",
-  "ad_sorting":
-"priority_then_boost"
+  "ad_sorting": "priority_then_boost",
+  "languages": [
+    "zh",
+    "en"
+  ]
 }
