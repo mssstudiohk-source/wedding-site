@@ -1,0 +1,121 @@
+[
+  {
+    "date": "01-01-26",
+    "label_zh": "元旦",
+    "label_en": "The first day of January",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "17-02-26",
+    "label_zh": "農曆年初一",
+    "label_en": "Lunar New Year’s Day",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "18-02-26",
+    "label_zh": "農曆年初二",
+    "label_en": "The second day of Lunar New Year",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "19-02-26",
+    "label_zh": "農曆年初三",
+    "label_en": "The third day of Lunar New Year",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "03-04-26",
+    "label_zh": "耶穌受難節",
+    "label_en": "Good Friday",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "04-04-26",
+    "label_zh": "耶穌受難節翌日",
+    "label_en": "The day following Good Friday",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "06-04-26",
+    "label_zh": "清明節翌日",
+    "label_en": "The day following Ching Ming Festival",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "07-04-26",
+    "label_zh": "復活節星期一翌日",
+    "label_en": "The day following Easter Monday",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "01-05-26",
+    "label_zh": "勞動節",
+    "label_en": "Labour Day",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "25-05-26",
+    "label_zh": "佛誕翌日",
+    "label_en": "The day following the Birthday of the Buddha",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "19-06-26",
+    "label_zh": "端午節",
+    "label_en": "Tuen Ng Festival",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "01-07-26",
+    "label_zh": "香港特別行政區成立紀念日",
+    "label_en": "Hong Kong Special Administrative Region Establishment Day",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "26-09-26",
+    "label_zh": "中秋節翌日",
+    "label_en": "The day following the Chinese Mid-Autumn Festival",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "01-10-26",
+    "label_zh": "國慶日",
+    "label_en": "National Day",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "19-10-26",
+    "label_zh": "重陽節翌日",
+    "label_en": "The day following Chung Yeung Festival",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "25-12-26",
+    "label_zh": "聖誕節",
+    "label_en": "Christmas Day",
+    "kind": "public_holiday",
+    "note": ""
+  },
+  {
+    "date": "26-12-26",
+    "label_zh": "聖誕節後第一個周日",
+    "label_en": "The first weekday after Christmas Day",
+    "kind": "public_holiday",
+    "note": ""
+  }
+]
