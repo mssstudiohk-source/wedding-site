@@ -1,6 +1,6 @@
 {
-  "name": "wedding-sisi-api",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
+    "name": "wedding-sisi-api",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module"
 }
