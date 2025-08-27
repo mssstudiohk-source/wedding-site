@@ -61,7 +61,7 @@ export default async function handler(req, res) {
         return out.join("\n");
       },
 
- // 2) 化妝師：列三個卡片（支援 {items:[...]} 或直接 [...])
+// 2) 化妝師：列三個卡片（支援 {items:[...]} 或直接 [...])
 vendor_card_zh: () => {
   // 支援兩種根節點：
   //   A) { "items": [ {...}, {...} ] }
@@ -80,25 +80,19 @@ vendor_card_zh: () => {
     .sort((a,b) => (Number(pick(b,"priority","weight","score"))||0) - (Number(pick(a,"priority","weight","score"))||0))
     .slice(0,3);
 
-  const lines = data.map(v => {
-    return [
-      `💄 **${v.name_zh || ""}**`,
-      v.description ? `📌 ${v.description}` : "",
-      v.services?.length ? `✨ 服務：${v.services.join("、")}` : "",
-      v.price_range_hkd ? `💰 價錢範圍：${v.price_range_hkd}` : "",
-      v.location ? `📍 地區：${v.location}` : "",
-      v.contact?.ig ? `📷 IG：${v.contact.ig}` : "",
-      v.notes_zh ? `📝 備註：${v.notes_zh}` : ""
-    ].filter(Boolean).join("\n");
-  });
+  return top.map(v => {
+    const name  = pick(v,"name","title","brand") || "未命名";
+    const desc  = pick(v,"desc","description","style");
+    const price = pick(v,"price_from","start_from","price","min_price");
+    const url   = pick(v,"url","link","website");
 
-  return res.status(200).json({
-    ok: true,
-    flow: flow.id,
-    template: flow.template,
-    source: source,
-    answer: lines.join("\n\n")
-  });
+    return [
+      `【${name}】`,
+      desc  ? `— 風格：${desc}` : null,
+      price ? `— 起價：約 $${price}` : null,
+      url   ? `— 連結：${url}` : null,
+    ].filter(Boolean).join("\n");
+  }).join("\n\n");
 },
 
       // 3) 2025 紅日：列出最近三個
