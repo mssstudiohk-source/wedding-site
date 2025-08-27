@@ -1,51 +1,22 @@
-[
-  {
-    "step_id": 1,
-    "role": "ai_ask",
-    "content": "你想舉行咩形式嘅婚禮？",
-    "options_ref": "wedding_types"
-  },
-  {
-    "step_id": 2,
-    "role": "user_ask",
-    "content": "我想知過大禮要準備啲乜？",
-    "fixed_answer_key": "過大禮"
-  },
-  {
-    "step_id": 3,
-    "role": "ai_ask",
-    "content": "大概幾多位賓客？（可填數字）"
-  },
-  {
-    "step_id": 4,
-    "role": "ai_ask",
-    "content": "心儀場地類型？",
-    "options_ref": "venue_types",
-    "conditional": {
-      "trigger_answer": "戶外",
-      "tip_if_true": "戶外注意天氣及備選方案（雨備）"
-    }
-  }
-  {
+{
   "flows": [
     {
       "id": "tradition",
-      "keywords": ["過大禮","安床","上頭","回門"],
+      "keywords": ["過大禮", "安床", "上頭", "回門"],
       "source": "traditions/traditions.json",
       "template": "tradition_zh"
     },
     {
       "id": "makeup_vendors",
-      "keywords": ["化妝師","MUA"],
+      "keywords": ["化妝師", "MUA"],
       "source": "vendors/vendors_makeup.json",
       "template": "vendor_card_zh"
     },
     {
       "id": "holiday",
-      "keywords": ["紅日","公眾假期"],
+      "keywords": ["紅日", "公眾假期"],
       "source": "dates/holidays_2025.json",
       "template": "holiday_zh"
     }
   ]
 }
-]
