@@ -61,29 +61,41 @@ export default async function handler(req, res) {
         return out.join("\n");
       },
 
-// 2) 化妝師：列三個卡片
+// 2) 化妝師：列卡片
 if (flow.template === "vendor_card_zh") {
-  if (!Array.isArray(data)) {
-    return res.status(200).json({ ok: false, answer: "Vendor 資料格式錯誤" });
+  try {
+    // 接受兩種格式：直接陣列 or { items:[...] }
+    const list = Array.isArray(data) ? data
+               : (data && Array.isArray(data.items)) ? data.items
+               : [];
+
+    if (!Array.isArray(list)) throw new Error("vendor data is not an array");
+
+    const lines = list.map((v) => {
+      const name = (v.name_zh || v.name_en || "").trim();
+      const parts = [];
+      if (v.description) parts.push(`📌 ${v.description}`);
+      if (Array.isArray(v.services) && v.services.length) parts.push(`✨ 服務：${v.services.join("、")}`);
+      if (v.price_range_hkd) parts.push(`💰 價錢範圍：${v.price_range_hkd}`);
+      if (v.location) parts.push(`📍 地區：${v.location}`);
+      if (v.contact && v.contact.ig) parts.push(`📷 IG：${v.contact.ig}`);
+      if (v.notes_zh) parts.push(`📝 備註：${v.notes_zh}`);
+      return `💄 **${name}**\n${parts.join("\n")}`;
+    });
+
+    return res.status(200).json({
+      ok: true,
+      flow: flow.id,
+      template: flow.template,
+      answer: lines.join("\n\n")
+    });
+  } catch (e) {
+    return res.status(200).json({
+      ok: false,
+      where: "vendor_card_zh",
+      error: String(e)
+    });
   }
-
-  const lines = data.map((v) => [
-    `💄 **${v.name_zh ?? v.name_en ?? ""}**`,
-    v.description ? `📌 ${v.description}` : "",
-    Array.isArray(v.services) && v.services.length ? `✨ 服務：${v.services.join("、")}` : "",
-    v.price_range_hkd ? `💰 價錢範圍：${v.price_range_hkd}` : "",
-    v.location ? `📍 地區：${v.location}` : "",
-    v.contact && v.contact.ig ? `📷 IG：${v.contact.ig}` : "",
-    v.notes_zh ? `📝 備註：${v.notes_zh}` : ""
-  ].filter(Boolean).join("\n"));
-
-  return res.status(200).json({
-    ok: true,
-    flow: flow.id,
-    template: flow.template,
-    source,
-    answer: lines.join("\n\n")
-  });
 }
       // 3) 2025 紅日：列出最近三個
       holiday_zh: () => {
