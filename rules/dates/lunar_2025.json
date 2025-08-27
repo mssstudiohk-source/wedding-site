@@ -1,0 +1,15 @@
+[
+  {
+    "date": "2025-09-09",
+    "lunar": {"month": 8, "day": 17},
+    "day_stem_branch": "乙亥",
+    "clash_animal": "蛇",
+    "good_for": ["上頭","安床","嫁娶"],
+    "avoid": ["動土","搬屋"],
+    "good_hours": [
+      {"branch": "子", "range": "23:00-00:59"},
+      {"branch": "卯", "range": "05:00-06:59"}
+    ],
+    "notes": "沖蛇，屬蛇者宜避。"
+  }
+]
