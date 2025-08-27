@@ -1,0 +1,6 @@
+{
+  "items": [
+    {"name":"MUA A","desc":"自然清透","price_from":1800,"priority":90,"url":"https://…"},
+    {"name":"MUA B","desc":"韓風霧面","price_from":2200,"priority":70}
+  ]
+}
