@@ -32,20 +32,34 @@ export default async function handler(req, res) {
     }
 
     // 4) Flow table (simple keyword routing)
-    const flows = [
-      {
-        id: "tradition",
-        keywords: ["過大禮", "安床", "上頭", "回門"],
-        source: `${BASE}/traditions/traditions.json`,
-        template: "tradition_zh",
-      },
-      {
-        id: "makeup_vendors",
-        keywords: ["化妝師", "MUA", "化粧師"],
-        source: `${BASE}/vendors/vendors_makeup.json`,
-        template: "vendor_card_zh",
-      },
-      {
+// 1) 傳統禮儀 (過大禮 / 安床 / 回門)
+const tradition_zh = (t) => {
+  let lines = [];
+  if (t.summary_zh) lines.push(`📌 重點：${t.summary_zh}`);
+  if (Array.isArray(t.details_zh) && t.details_zh.length) {
+    lines.push("📋 細節：");
+    lines = lines.concat(t.details_zh.map((d, i) => `${i+1}. ${d}`));
+  }
+  if (t.notes_zh) lines.push(`📝 備註：${t.notes_zh}`);
+  return lines.join("\n");
+},
+
+// 2) 化妝師 Vendor Card 中文
+const vendor_card_zh = (data) => {
+  return data.map(v => {
+    return [
+      `💄 **${v.name_zh || v.name_en || ""}**`,
+      v.description ? `✨ 風格：${v.description}` : "",
+      v.services?.length ? `📋 服務：${v.services.map((s,i)=>`${i+1}. ${s}`).join("\n")}` : "",
+      v.price_range_hkd ? `💰 價錢範圍：${v.price_range_hkd}` : "",
+      v.location ? `📍 地區：${v.location}` : "",
+      v.contact?.ig ? `📸 IG: ${v.contact.ig}` : "",
+      v.contact?.website ? `🔗 網站: ${v.contact.website}` : "",
+      v.notes_zh ? `📝 備註：${v.notes_zh}` : ""
+    ].filter(Boolean).join("\n");
+  }).join("\n\n");  // 每個 vendor 之間空一行
+},
+    {
         id: "holiday",
         keywords: ["紅日", "公眾假期"],
         source: `${BASE}/dates/holidays_2025.json`,
