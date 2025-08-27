@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     const fetchJSON = async (path) => {
       const url = `${BASE}/${path.replace(/^\//, "")}`;
       const r = await fetch(url, { cache: "no-store" });
-      if (!r.ok) {
+       (!r.ok) {
         const txt = await r.text().catch(() => "");
         throw new Error(`Fetch fail ${r.status} ${url} :: ${txt.slice(0, 200)}`);
       }
@@ -119,16 +119,12 @@ export default async function handler(req, res) {
     }
 
     // 化妝師 Vendor
-    if (includesAny(q, ["化妝師", "MUA", "搵化妝"])) {
+    if (includesAny(q, ["化妝師", "MUA", "化粧師"])) {
       let data, url;
       try {
         const r1 = await fetchJSON("vendors/vendors_makeup.json");
         url = r1.url;
         data = r1.json;
-      } catch {
-        const r2 = await fetchJSON("vendors/vendors_makeup22.json"); // 兼容你另一個檔名
-        url = r2.url;
-        data = r2.json;
       }
 
       const answer = vendor_card_zh(data);
@@ -178,9 +174,11 @@ export default async function handler(req, res) {
 /* ------------------ 內部輸出工具 ------------------ */
 function out({ res, wantText, ...payload }) {
   if (wantText) {
-    // 只輸出 answer 文字（例如 ?format=text）
+    // 🔹 設定 header，確保分行會顯示
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     return res.status(200).send(payload.answer || "");
   }
+
   // JSON 輸出
   return res.status(200).json(payload);
 }
