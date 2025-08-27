@@ -1,89 +1,88 @@
-// api/sisi3.js — minimal safe: 固定答案（過大禮/安床/回門）
+// /api/sisi3.js
 export default async function handler(req, res) {
   try {
-    // 取 base（https://你的域名）
-    const h = req && req.headers ? req.headers : {};
-    const p = String(h["x-forwarded-proto"] || "https").split(",")[0];
-    const host = String(h["x-forwarded-host"] || h.host || "").split(",")[0];
-    const base = (p ? p : "https") + "://" + host;
+    const q = (req.query.question || "").trim();
+    const debug = req.query.debug;
 
-    // 取 question（GET 或 POST）
-    let q = "";
-    if (req.method === "POST") {
-      try {
-        const bufs = []; for await (const c of req) bufs.push(c);
-        const body = JSON.parse(Buffer.concat(bufs).toString("utf8") || "{}");
-        q = String(body.question || "");
-      } catch {}
-    } else {
-      q = String((req.query && req.query.question) || "");
+    const BASE = process.env.RULES_BASE_URL;
+    if (!BASE) {
+      return res.status(500).json({ ok: false, where: "env", error: "RULES_BASE_URL is required" });
     }
-    q = q.trim();
 
-    // 無問題 → 回用法
-    if (!q) {
+    // 小工具：安全抓 JSON（不 throw，返回 {ok,data,error}）
+    const loadJSON = async (rel) => {
+      const url = `${BASE}/${rel}`;
+      try {
+        const r = await fetch(url, { cache: "no-store" });
+        if (!r.ok) return { ok: false, error: `HTTP ${r.status}`, url };
+        const data = await r.json();
+        return { ok: true, data, url };
+      } catch (e) {
+        return { ok: false, error: String(e), url };
+      }
+    };
+
+    // Debug 路徑：只檢查 flow 檔有無讀到
+    if (debug) {
+      const conv = await loadJSON("conversation_flow.json");
+      const flows = await loadJSON("reply_flow.json");
       return res.status(200).json({
-        ok: true,
-        ver: "sisi3-min",
-        tip: "加 ?question=過大禮 / 安床 / 回門"
+        ok: conv.ok && flows.ok,
+        conversation_ok: conv.ok, conversation_url: conv.url, conversation_error: conv.error || null,
+        replyflow_ok: flows.ok, replyflow_url: flows.url, replyflow_error: flows.error || null,
+        steps: conv.data?.steps || [],
+        flows: flows.data?.flows || []
       });
     }
 
-    // 只讀 traditions.json（固定答案）
-    const url = base + "/rules/traditions/traditions.json";
-    let txt = "";
-    try {
-      const r = await fetch(url, { cache: "no-store" });
-      txt = await r.text();
-      if (!r.ok) {
-        return res.status(200).json({ ok: false, where: "fetch", status: r.status, preview: txt.slice(0, 160) });
+    // ---- 正常回答邏輯（先做 traditions DEMO）----
+    // 1) 命中傳統禮節關鍵字
+    const hitKeys = ["過大禮", "安床", "上頭", "回門"];
+    const hit = hitKeys.find(k => q.includes(k));
+    if (hit) {
+      const tj = await loadJSON("traditions/traditions.json");
+      if (!tj.ok) {
+        return res.status(200).json({
+          ok: false, where: "fetch_traditions", url: tj.url, error: tj.error
+        });
       }
-    } catch (e) {
-      return res.status(200).json({ ok: false, where: "fetch", error: String(e) });
+      const rec = tj.data?.[hit];
+      if (!rec) {
+        return res.status(200).json({ ok: false, where: "traditions_lookup", error: `No entry for '${hit}'` });
+      }
+
+      // 兼容 _zh / 無後綴
+      const pick = (obj, key) => obj?.[key + "_zh"] ?? obj?.[key] ?? "";
+      const pickList = (obj, key) =>
+        Array.isArray(obj?.[key + "_zh"]) ? obj[key + "_zh"]
+        : Array.isArray(obj?.[key])      ? obj[key]
+        : [];
+
+      const summary = pick(rec, "summary");
+      const details = pickList(rec, "details");
+      const notes   = pick(rec, "notes");
+
+      const lines = [];
+      if (summary) lines.push("重點：" + summary);
+      if (details?.length) lines.push("細節：\n- " + details.join("\n- "));
+      if (notes) lines.push("備註：" + notes);
+
+      return res.status(200).json({
+        ok: true,
+        topic: hit,
+        answer: lines.join("\n"),
+        source: "traditions/traditions.json"
+      });
     }
 
-    // 解析 JSON
-    let data = null;
-    try {
-      data = JSON.parse(txt);
-    } catch (e) {
-      return res.status(200).json({ ok: false, where: "parse", error: String(e), preview: txt.slice(0, 160) });
-    }
-
-// 命中關鍵字
-const keys = ["過大禮", "安床", "上頭", "回門"];
-const hit = keys.find(k => q.includes(k));
-if (hit && data && typeof data === "object" && data[hit]) {
-  const t = data[hit] || {};
-
-  // 同時相容 _zh 及無後綴鍵
-  const pick = (obj, key) => obj?.[key + "_zh"] ?? obj?.[key] ?? "";
-  const pickList = (obj, key) =>
-    Array.isArray(obj?.[key + "_zh"]) ? obj[key + "_zh"]
-    : Array.isArray(obj?.[key])      ? obj[key]
-    : [];
-
-  const summary = pick(t, "summary");
-  const detailsArr = pickList(t, "details");
-  const notes = pick(t, "notes");
-
-  const detailsTxt = detailsArr.length ? ("\n- " + detailsArr.join("\n- ")) : "";
-  const notesTxt   = notes ? ("\n\n備註：" + notes) : "";
-
-  return res.status(200).json({
-    ok: true,
-    answer: "重點：" + summary + detailsTxt + notesTxt
-  });
-}
-
-    // 未命中 → 提示
+    // 2) 其他（暫時回指引）
     return res.status(200).json({
       ok: true,
-      note: "暫時只支援：過大禮 / 安床 / 回門。可先試其中一個關鍵字。"
+      answer: "暫時支援：過大禮／安床／上頭／回門。你可以試問：『過大禮要準備啲乜？』",
     });
 
   } catch (e) {
-    // 永不 500：任何錯都以 200 回應
-    return res.status(200).json({ ok: false, fatal: String(e) });
+    // 任何例外都唔丟 500 純字串，回可讀錯誤
+    return res.status(500).json({ ok: false, error: e?.message || String(e) });
   }
 }
