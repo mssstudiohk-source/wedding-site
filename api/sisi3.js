@@ -61,42 +61,7 @@ export default async function handler(req, res) {
         return out.join("\n");
       },
 
-// 2) 化妝師（或其他 Vendor）卡片輸出
-if (flow.template === "vendor_card_zh") {
-  try {
-    // 支援兩種格式：[{...}] 或 { items:[...] }
-    const list = Array.isArray(data) ? data
-               : (data && Array.isArray(data.items)) ? data.items
-               : [];
 
-    if (!Array.isArray(list)) throw new Error("vendor data is not an array");
-
-    const lines = list.map((v) => {
-      const name = (v.name_zh || v.name_en || "").trim();
-      const parts = [];
-      if (v.description) parts.push(`📌 ${v.description}`);
-      if (Array.isArray(v.services) && v.services.length) parts.push(`✨ 服務：${v.services.join("、")}`);
-      if (v.price_range_hkd) parts.push(`💰 價錢範圍：${v.price_range_hkd}`);
-      if (v.location) parts.push(`📍 地區：${v.location}`);
-      if (v.contact && v.contact.ig) parts.push(`📷 IG：${v.contact.ig}`);
-      if (v.notes_zh) parts.push(`📝 備註：${v.notes_zh}`);
-      return `💄 **${name}**\n${parts.join("\n")}`;
-    });
-
-    return res.status(200).json({
-      ok: true,
-      flow: flow.id,
-      template: flow.template,
-      answer: lines.join("\n\n")
-    });
-  } catch (e) {
-    return res.status(200).json({
-      ok: false,
-      where: "vendor_card_zh",
-      error: String(e)
-    });
-  }
-}
     // 3) 2025 紅日：列出最近三個
       holiday_zh: () => {
         const list = Array.isArray(srcRes.data) ? srcRes.data : [];
