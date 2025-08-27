@@ -61,29 +61,27 @@ export default async function handler(req, res) {
         return out.join("\n");
       },
 
-// 2) 化妝師：列三個卡片（支援 {items:[...]} 或直接 [...])
+// 2) 化妝師：列三個卡片
 if (flow.template === "vendor_card_zh") {
   if (!Array.isArray(data)) {
     return res.status(200).json({ ok: false, answer: "Vendor 資料格式錯誤" });
   }
 
-  const lines = data.map(v => {
-    return [
-      `💄 **${v.name_zh || ""}**`,
-      v.description ? `📌 ${v.description}` : "",
-      v.services?.length ? `✨ 服務：${v.services.join("、")}` : "",
-      v.price_range_hkd ? `💰 價錢範圍：${v.price_range_hkd}` : "",
-      v.location ? `📍 地區：${v.location}` : "",
-      v.contact?.ig ? `📷 IG：${v.contact.ig}` : "",
-      v.notes_zh ? `📝 備註：${v.notes_zh}` : ""
-    ].filter(Boolean).join("\n");
-  });
+  const lines = data.map((v) => [
+    `💄 **${v.name_zh ?? v.name_en ?? ""}**`,
+    v.description ? `📌 ${v.description}` : "",
+    Array.isArray(v.services) && v.services.length ? `✨ 服務：${v.services.join("、")}` : "",
+    v.price_range_hkd ? `💰 價錢範圍：${v.price_range_hkd}` : "",
+    v.location ? `📍 地區：${v.location}` : "",
+    v.contact && v.contact.ig ? `📷 IG：${v.contact.ig}` : "",
+    v.notes_zh ? `📝 備註：${v.notes_zh}` : ""
+  ].filter(Boolean).join("\n"));
 
   return res.status(200).json({
     ok: true,
     flow: flow.id,
     template: flow.template,
-    source: source,
+    source,
     answer: lines.join("\n\n")
   });
 }
