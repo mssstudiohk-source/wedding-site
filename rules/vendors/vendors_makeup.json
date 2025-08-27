@@ -1,0 +1,22 @@
+[
+  {
+    "id":"makeup_001",
+    "name_zh":"Amy Makeup","name_en":"Amy Makeup",
+    "contact":{"phone":"","email":"","website":"","ig":""},
+    "location":"Kowloon",
+    "services":["新娘化妝","姊妹化妝","試妝"],
+    "price_range_hkd":"1500–5000",
+    "description":"自然清透底妝｜上門服務",
+    "images":[ { "src":"https://…/amy.jpg", "alt":"自然妝", "priority":1 } ],
+    "ad_package":{
+      "image_count":2,
+      "text_tokens":120,
+      "keywords":["自然妝感","上門"],
+      "boost_level":2,
+      "priority":6,
+      "side_push_count":1,
+      "blog_posts":0
+    },
+    "notes_zh":"如需加鐘請預先通知"
+  }
+]
