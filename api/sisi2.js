@@ -125,6 +125,10 @@ export default async function handler(req, res) {
         const r1 = await fetchJSON("vendors/vendors_makeup.json");
         url = r1.url;
         data = r1.json;
+      } catch {
+        const r2 = await fetchJSON("vendors/vendors_makeup22.json"); // 兼容你另一個檔名
+        url = r2.url;
+        data = r2.json;
       }
 
       const answer = vendor_card_zh(data);
