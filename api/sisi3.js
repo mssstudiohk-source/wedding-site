@@ -61,10 +61,10 @@ export default async function handler(req, res) {
         return out.join("\n");
       },
 
-// 2) 化妝師：列卡片
+// 2) 化妝師（或其他 Vendor）卡片輸出
 if (flow.template === "vendor_card_zh") {
   try {
-    // 接受兩種格式：直接陣列 or { items:[...] }
+    // 支援兩種格式：[{...}] 或 { items:[...] }
     const list = Array.isArray(data) ? data
                : (data && Array.isArray(data.items)) ? data.items
                : [];
@@ -97,7 +97,7 @@ if (flow.template === "vendor_card_zh") {
     });
   }
 }
-      // 3) 2025 紅日：列出最近三個
+    // 3) 2025 紅日：列出最近三個
       holiday_zh: () => {
         const list = Array.isArray(srcRes.data) ? srcRes.data : [];
         if (!list.length) return "未有假期資料。";
