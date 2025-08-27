@@ -40,63 +40,33 @@ export default async function handler(req, res) {
     const tpl = flow.template || "plain";
 
     const formatters = {
-      // 1) 傳統禮節：從 object 取中英欄位
-      tradition_zh: () => {
-        const keys = ["過大禮","安床","上頭","回門"];
-        const hit = keys.find(k => q.includes(k));
-        const rec = srcRes.data?.[hit];
-        if (!rec) return `未搵到「${hit}」資料。`;
-
-        const pick = (obj, k) => obj?.[k + "_zh"] ?? obj?.[k] ?? "";
-        const pickList = (obj, k) => Array.isArray(obj?.[k + "_zh"]) ? obj[k + "_zh"] : (Array.isArray(obj?.[k]) ? obj[k] : []);
-
-        const summary = pick(rec, "summary");
-        const details = pickList(rec, "details");
-        const notes   = pick(rec, "notes");
-
-        const out = [];
-        if (summary) out.push(`重點：${summary}`);
-        if (details.length) out.push("細節：\n- " + details.join("\n- "));
-        if (notes) out.push(`備註：${notes}`);
-        return out.join("\n");
-      },
-// 2) 化妝師（或其他 Vendor）卡片輸出
-if (flow.template === "vendor_card_zh") {
-  try {
-    // 支援兩種格式：[{...}] 或 { items:[...] }
-    const list = Array.isArray(data) ? data
-               : (data && Array.isArray(data.items)) ? data.items
-               : [];
-
-    if (!Array.isArray(list)) throw new Error("vendor data is not an array");
-
-    const lines = list.map((v) => {
-      const name = (v.name_zh || v.name_en || "").trim();
-      const parts = [];
-      if (v.description) parts.push(`📌 ${v.description}`);
-      if (Array.isArray(v.services) && v.services.length) parts.push(`✨ 服務：${v.services.join("、")}`);
-      if (v.price_range_hkd) parts.push(`💰 價錢範圍：${v.price_range_hkd}`);
-      if (v.location) parts.push(`📍 地區：${v.location}`);
-      if (v.contact && v.contact.ig) parts.push(`📷 IG：${v.contact.ig}`);
-      if (v.notes_zh) parts.push(`📝 備註：${v.notes_zh}`);
-      return `💄 **${name}**\n${parts.join("\n")}`;
-    });
-
-    return res.status(200).json({
-      ok: true,
-      flow: flow.id,
-      template: flow.template,
-      answer: lines.join("\n\n")
-    });
-  } catch (e) {
-    return res.status(200).json({
-      ok: false,
-      where: "vendor_card_zh",
-      error: String(e)
-    });
+// 1) 傳統禮儀 (過大禮 / 安床 / 回門)
+const tradition_zh = (t) => {
+  let lines = [];
+  if (t.summary_zh) lines.push(`📌 重點：${t.summary_zh}`);
+  if (Array.isArray(t.details_zh) && t.details_zh.length) {
+    lines.push("📋 細節：");
+    lines = lines.concat(t.details_zh.map((d, i) => `${i+1}. ${d}`));
   }
-},
+  if (t.notes_zh) lines.push(`📝 備註：${t.notes_zh}`);
+  return lines.join("\n");
+};
 
+// 2) 化妝師 Vendor Card 中文
+const vendor_card_zh = (data) => {
+  return data.map(v => {
+    return [
+      `💄 **${v.name_zh || v.name_en || ""}**`,
+      v.description ? `✨ 風格：${v.description}` : "",
+      v.services?.length ? `📋 服務：${v.services.map((s,i)=>`${i+1}. ${s}`).join("\n")}` : "",
+      v.price_range_hkd ? `💰 價錢範圍：${v.price_range_hkd}` : "",
+      v.location ? `📍 地區：${v.location}` : "",
+      v.contact?.ig ? `📸 IG: ${v.contact.ig}` : "",
+      v.contact?.website ? `🔗 網站: ${v.contact.website}` : "",
+      v.notes_zh ? `📝 備註：${v.notes_zh}` : ""
+    ].filter(Boolean).join("\n");
+  }).join("\n\n");  // 每個 vendor 之間空一行
+};
     // 3) 2025 紅日：列出最近三個
       holiday_zh: () => {
         const list = Array.isArray(srcRes.data) ? srcRes.data : [];
