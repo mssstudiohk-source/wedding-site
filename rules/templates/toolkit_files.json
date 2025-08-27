@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "id": "budget",
+      "name_zh": "預算表",
+      "columns": [
+        {
+          "key": "item",
+          "label_zh": "項目"
+        },
+        {
+          "key": "amount",
+          "label_zh": "金額_hkd"
+        }
+      ]
+    },
+    {
+      "id": "guest_list",
+      "name_zh": "賓客名單",
+      "columns": [
+        {
+          "key": "name",
+          "label_zh": "姓名"
+        }
+      ]
+    }
+  ]
+}
