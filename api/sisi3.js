@@ -87,3 +87,10 @@ if (hit && data && typeof data === "object" && data[hit]) {
     return res.status(200).json({ ok: false, fatal: String(e) });
   }
 }
+if (req.query.debug) {
+  return res.status(200).json({
+    ok: true,
+    steps: conversationFlow.steps || [],
+    flows: replyFlow.flows || []
+  });
+}
