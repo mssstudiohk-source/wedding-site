@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     }
 
     // 只讀 traditions.json（固定答案）
-    const url = base + "/rules/traditions.json";
+    const url = base + "/rules/traditions/traditions.json";
     let txt = "";
     try {
       const r = await fetch(url, { cache: "no-store" });
