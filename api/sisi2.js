@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       },
       {
         id: "makeup_vendors",
-        keywords: ["化妝師", "MUA"],
+        keywords: ["化妝師", "MUA", "化粧師"],
         source: `${BASE}/vendors/vendors_makeup.json`,
         template: "vendor_card_zh",
       },
