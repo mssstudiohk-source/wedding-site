@@ -35,3 +35,19 @@
 - summary: 簡介
 - details: 細項列表
 - notes: 備註
+
+## images 物件
+{
+  "src": "https://cdn.example.com/path/img.jpg",
+  "alt": "說明文字",
+  "w": 1600, "h": 1067, "ratio": 1.5,
+  "thumb": "https://cdn.example.com/path/img_400.jpg",
+  "priority": 1
+}
+
+- src: 必填，公開可讀的 HTTPS 連結
+- alt: 替代文字 (SEO/無障礙)
+- w/h/ratio: 有助前端預先佈局 (可選)
+- thumb: 縮圖/低清圖 (可選)
+- priority: 數字越大越先顯示 (或你可約定相反；一致即可)
+
