@@ -3,5 +3,5 @@
 
   "holiday_zh": "📅 公眾假期：\\n{{holidays}}",
 
-  "vendor_card_zh": "💄 化妝師：{{name}}\n✨ 風格：{{description}}\\n💰 價錢：{{price_range_hkd}}\\n📍 地點：{{location}}\\n📸 IG：{{contact_ig}}\\n🔗 網站：{{contact_website}}\\n📦 套餐：\\n{{packages}}"
+  "vendor_card_zh": "💄 化妝師：{{name}}\\n✨ 風格：{{description}}\\n💰 價錢：{{price_range_hkd}}\\n📍 地點：{{location}}\\n📸 IG：{{contact_ig}}\\n🔗 網站：{{contact_website}}\\n📦 套餐：\\n{{packages}}"
 }
