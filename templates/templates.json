@@ -1,7 +1,7 @@
 {
-  "tradition_zh": "📜 傳統習俗：\\n重點：{{summary_zh}}\\n細節：{{details_zh}}\\n備註：{{notes_zh}}",
+  "tradition_zh": "📜 傳統習俗：\n重點：{{summary_zh}}\n細節：{{details_zh}}\n備註：{{notes_zh}}",
 
-  "holiday_zh": "📅 公眾假期：\\n{{holidays}}",
+  "holiday_zh": "📅 公眾假期：\n{{holidays}}",
 
-  "vendor_card_zh": "💄 化妝師：{{name}}\\n✨ 風格：{{description}}\\n💰 價錢：{{price_range_hkd}}\\n📍 地點：{{location}}\\n📸 IG：{{contact_ig}}\\n🔗 網站：{{contact_website}}\\n📦 套餐：\\n{{packages}}"
+  "vendor_card_zh": "💄 化妝師：{{name}}\n✨ 風格：{{description}}\n💰 價錢：{{price_range_hkd}}\n📍 地點：{{location}}\n📸 IG：{{contact_ig}}\n🔗 網站：{{contact_website}}\n📦 套餐：\n{{packages}}"
 }
