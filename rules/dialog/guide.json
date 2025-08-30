@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "greeting",
+      "type": "say",
+      "content": "你好呀～恭喜你籌備婚禮 🎉 我係 Sisi。想由邊度開始？",
+      "options": [
+        {"label": "傳統禮儀（過大禮／安床／上頭）", "next": "pick_trad"},
+        {"label": "查紅日／擇日", "next": "ask_date"},
+        {"label": "搵供應商（化妝師／場地…）", "next": "ask_vendor"},
+        {"label": "我未決定，畀少少建議", "next": "tip_first"}
+      ]
+    },
+
+    {
+      "id": "pick_trad",
+      "type": "say",
+      "content": "想睇邊個傳統環節？",
+      "options": [
+        {"label": "過大禮", "intent": "trad_過大禮", "next": "handoff"},
+        {"label": "安床", "intent": "trad_安床", "next": "handoff"},
+        {"label": "上頭", "intent": "trad_上頭", "next": "handoff"},
+        {"label": "回門", "intent": "trad_回門", "next": "handoff"},
+        {"label": "返主目錄", "next": "greeting"}
+      ]
+    },
+
+    {
+      "id": "ask_date",
+      "type": "ask",
+      "content": "想查紅日／擇日，請輸入日期（YYYY-MM-DD），例如：`2025-09-13`。",
+      "expect": "date",
+      "next": "handoff_date"
+    },
+
+    {
+      "id": "ask_vendor",
+      "type": "say",
+      "content": "想搵咩供應商？（而家支援：化妝師）",
+      "options": [
+        {"label": "化妝師", "intent": "vendor_化妝師", "next": "handoff"},
+        {"label": "返主目錄", "next": "greeting"}
+      ]
+    },
+
+    {
+      "id": "tip_first",
+      "type": "say",
+      "content": "都 OK～建議先諗三樣：1) 大概日子 📅  2) 預算 💰  3) 想要儀式風格 ✨ 有需要我可以畀 checklist 比你。要返主目錄嗎？",
+      "options": [
+        {"label": "返主目錄", "next": "greeting"}
+      ]
+    },
+
+    {
+      "id": "handoff",
+      "type": "handoff",
+      "content": "交畀功能引擎處理"
+    },
+    {
+      "id": "handoff_date",
+      "type": "handoff",
+      "content": "交畀日期引擎處理"
+    }
+  ]
+}
