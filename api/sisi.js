@@ -6,6 +6,13 @@ const DEFAULT_RULES_BASE =
   "https://raw.githubusercontent.com/mssstudiohk-source/wedding-sisi-api/main/rules";
 
 export default async function handler(req, res) {
+// 迷你對話進入點
+const guided = await handleGuide(req, res, out, wantText);
+if (guided) {
+  // 如果 guided 是 handoff 就繼續去你原有邏輯；如果已 out() 了就 return。
+  if (!guided.handoff) return; // 已經輸出
+  // 否則掉頭去處理傳統/紅日/vendor —— 你下面現成的代碼會用到 req.query.question
+}
   const q = String(req.query.question || "").trim();
   const wantText =
     (req.query.format || "").toLowerCase() === "text" ||
