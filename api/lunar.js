@@ -1,36 +1,70 @@
-// api/lunar.js  — Node ESM/Edge 都得
+// api/lunar.js
 import { createClient } from '@supabase/supabase-js';
 
-const url = process.env.SUPABASE_URL;
-const key = process.env.SUPABASE_ANON_KEY;
-const supa = createClient(url, key);
+const SUPA_URL = process.env.SUPABASE_URL || '';
+const SUPA_KEY = process.env.SUPABASE_ANON_KEY || '';
+
+const supa = (SUPA_URL && SUPA_KEY) ? createClient(SUPA_URL, SUPA_KEY) : null;
 
 export default async function handler(req, res) {
   try {
-    const date = String(req.query.date || '').slice(0, 10); // YYYY-MM-DD
+    const url = new URL(req.url, `https://${req.headers.host}`);
+    const date = (url.searchParams.get('date') || '').slice(0, 10);
     const wantText =
-      (req.query.format || '').toLowerCase() === 'text' ||
+      (url.searchParams.get('format') || '').toLowerCase() === 'text' ||
       (req.headers.accept || '').includes('text/plain');
+    const diag = url.searchParams.get('diag'); // ?diag=1 時會輸出診斷
 
-    if (!date) {
-      return res.status(200).json({ ok: false, error: 'date is required (YYYY-MM-DD)' });
+    // 環境變數檢查
+    if (!SUPA_URL || !SUPA_KEY) {
+      const payload = {
+        ok: false,
+        error: 'env-missing',
+        hint: 'SUPABASE_URL / SUPABASE_ANON_KEY is required.',
+        has_url: !!SUPA_URL,
+        has_key: !!SUPA_KEY
+      };
+      return wantText ? res.status(200).send(JSON.stringify(payload, null, 2))
+                      : res.status(200).json(payload);
     }
 
+    if (!date) {
+      const msg = 'date is required (YYYY-MM-DD). e.g. /api/lunar?date=2025-09-09&format=text';
+      return wantText ? res.status(200).send(msg) : res.status(200).json({ ok: false, error: msg });
+    }
+
+    // 連 Supabase（RLS 關閉或 policy 允許）
     const { data, error } = await supa
       .from('lunar_days')
       .select('*')
       .eq('date', date)
-      .single();
+      .maybeSingle();
+
+    if (diag) {
+      // 診斷輸出：幫你睇到實際錯處
+      return res.status(200).json({
+        ok: !error,
+        env_ok: !!(SUPA_URL && SUPA_KEY),
+        date,
+        supabase_error: error?.message || null,
+        row_found: !!data
+      });
+    }
 
     if (error) {
-      return res.status(200).json({ ok: false, where: 'select', error: error.message });
+      return res.status(200).json({
+        ok: false,
+        where: 'select lunar_days',
+        error: error.message
+      });
     }
 
     if (!data) {
-      return res.status(200).json({ ok: true, empty: true, date });
+      return wantText
+        ? res.status(200).send(`找不到 ${date} 的通勝資料。`)
+        : res.status(200).json({ ok: true, empty: true, date });
     }
 
-    // text 輸出（更易讀）
     if (wantText) {
       const lines = [
         `📅 ${data.date}`,
@@ -44,14 +78,13 @@ export default async function handler(req, res) {
         data.xiongsha_yiji_main?.length ? `凶煞：${data.xiongsha_yiji_main.join('、')}` : '',
         data.notes ? `備註：${data.notes}` : '',
       ].filter(Boolean);
-
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       return res.status(200).send(lines.join('\n'));
     }
 
-    // JSON 輸出
     return res.status(200).json({ ok: true, date, day: data });
   } catch (e) {
-    return res.status(200).json({ ok: false, fatal: String(e) });
+    // 永不 500：一律 200 回應詳細錯處，方便你 debug
+    return res.status(200).json({ ok: false, fatal: String(e?.stack || e) });
   }
 }
