@@ -91,14 +91,3 @@ function respond(res, payload, asText) {
   res.setHeader('Content-Type','application/json; charset=utf-8');
   return res.status(200).json(payload);
 }
-// 紅日分支最後幾行
-const r = await fetch(url, { cache: 'no-store' });
-const txt = await r.text();
-
-if (wantText) {
-  return res.status(200).send(txt);
-}
-let json;
-try { json = JSON.parse(txt); }
-catch { json = { ok: true, answer: txt }; }
-return res.status(200).json(json);
