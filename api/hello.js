@@ -1,4 +1,3 @@
-// api/sisi3.js  — 最簡 ESM 版本
 export default function handler(req, res) {
-  res.status(200).json({ ok: true, msg: "sisi3 ESM OK ✅" });
+  res.status(200).send("🎉 API OK! 試 /api/sisi?question=過大禮&format=text");
 }
