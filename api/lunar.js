@@ -1,9 +1,13 @@
 // api/lunar.js
+// 代替你現有的 client 建立方式
 import { createClient } from '@supabase/supabase-js';
 
 const SUPA_URL = process.env.SUPABASE_URL || '';
-const SUPA_KEY = process.env.SUPABASE_ANON_KEY || '';
-const supa = (SUPA_URL && SUPA_KEY) ? createClient(SUPA_URL, SUPA_KEY) : null;
+const SRV_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+const supa = createClient(SUPA_URL, SRV_KEY || ANON_KEY, {
+  auth: { persistSession: false }
+});
 
 export default async function handler(req, res) {
   try {
