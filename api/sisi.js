@@ -6,13 +6,6 @@ const DEFAULT_RULES_BASE =
   "https://raw.githubusercontent.com/mssstudiohk-source/wedding-sisi-api/main/rules";
 
 export default async function handler(req, res) {
-// 迷你對話進入點
-const guided = await handleGuide(req, res, out, wantText);
-if (guided) {
-  // 如果 guided 是 handoff 就繼續去你原有邏輯；如果已 out() 了就 return。
-  if (!guided.handoff) return; // 已經輸出
-  // 否則掉頭去處理傳統/紅日/vendor —— 你下面現成的代碼會用到 req.query.question
-}
   const q = String(req.query.question || "").trim();
   const wantText =
     (req.query.format || "").toLowerCase() === "text" ||
@@ -120,92 +113,6 @@ if (guided) {
 
       return out({ ok: true, flow: intent.flow, answer: lines.join("\n\n") });
     }
-
-// ===== 迷你對話引擎（放在 handler 內，主判斷之前） =====
-const GUIDE_URL = `${DEFAULT_RULES_BASE}/dialog/guide.json`;
-
-async function handleGuide(req, res, out, wantText) {
-  // 入口條件：query.guide=1 或者 問句包含「開始」「對話」「help」
-  const q = String(req.query.question || "");
-  const guideMode =
-    req.query.guide === "1" || /(開始|對話|help|menu)/i.test(q);
-
-  if (!guideMode) return null; // 不處理，交返主程式
-
-  // 讀流程
-  let flow;
-  try {
-    flow = await fetchJSON(GUIDE_URL);
-  } catch (_) {
-    return out({ ok: false, answer: "對話流程暫時讀取不到 🙈" });
-  }
-
-  const steps = Array.isArray(flow?.steps) ? flow.steps : [];
-  const byId = Object.fromEntries(steps.map(s => [s.id, s]));
-
-  // 取當前 step（預設 greeting）
-  const stepId = String(req.query.step || "greeting");
-  const step = byId[stepId] || byId["greeting"];
-
-  // Handoff：把意圖交回主功能
-  if (step?.type === "handoff") {
-    const intent = String(req.query.intent || "");
-    // 1) 傳統禮儀
-    if (intent.startsWith("trad_")) {
-      const k = intent.replace("trad_", ""); // 過大禮/安床/上頭/回門
-      req.query.question = k; // 直接重用你現有傳統邏輯
-      return { handoff: "tradition" };
-    }
-    // 2) Vendor
-    if (intent.startsWith("vendor_")) {
-      const k = intent.replace("vendor_", ""); // 化妝師
-      req.query.question = k;
-      return { handoff: "vendor" };
-    }
-    // 3) 紅日/擇日（由 ask_date 來）
-    if (stepId === "handoff_date") {
-      // 用戶會以 ?answer=2025-09-13 傳入
-      const date = String(req.query.answer || "").trim();
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        return out({ ok: true, answer: "日期格式唔啱，試下 2025-09-13 🙏" });
-      }
-      // 交畀 lunar.js 的查詢邏輯：直接把 question 改成 「紅日 2025-09-13」
-      req.query.question = `紅日 ${date}`;
-      req.query.format = req.query.format || "text";
-      return { handoff: "lunar" };
-    }
-  }
-
-  // 普通「say」或「ask」：輸出步驟 + next link（文字 or JSON）
-  if (!step) return out({ ok: false, answer: "對話流程未就緒 🙈" });
-
-  // 文字模式：把 options 變成可點擊 URL
-  let answer = step.content || "";
-  if (Array.isArray(step.options) && step.options.length) {
-    const base = req.url.split("?")[0];
-    const baseQS = (extra) =>
-      `${base}?guide=1${req.query.format ? `&format=${req.query.format}` : ""}${extra}`;
-
-    const lines = step.options.map((opt, i) => {
-      const href = baseQS(`&step=${encodeURIComponent(opt.next || "greeting")}${opt.intent ? `&intent=${encodeURIComponent(opt.intent)}` : ""}`);
-      return `${i + 1}. ${opt.label} → ${href}`;
-    });
-    answer += `\n\n${lines.join("\n")}`;
-  } else if (step.type === "ask") {
-    const base = req.url.split("?")[0];
-    const example = `${base}?guide=1&step=${encodeURIComponent(step.next)}&answer=2025-09-13${req.query.format ? `&format=${req.query.format}` : ""}`;
-    answer += `\n\n（例如把答案放網址：${example}）`;
-  }
-
-  return out({
-    ok: true,
-    guide: true,
-    step: step.id,
-    answer
-  });
-}
-
-
     
     // ---------- holiday ----------
     if (intent.template === "holiday_zh") {
