@@ -17,24 +17,23 @@ export default async function handler(req, res) {
   }
 
   // 2) 紅日/通勝（轉 call /api/lunar）
-  if (/(紅日|公眾假期|通勝|擇日)/.test(q)) {
-    const date = (q.match(/\d{4}-\d{2}-\d{2}/) || [])[0];
-    if (!date) {
-      const msg = '請講清楚日期：例如「紅日 2025-09-09」';
-      return wantText ? res.status(200).send(msg) : res.status(200).json({ ok: true, msg });
-    }
-    const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
-    const r = await fetch(`${base}/api/lunar?date=${date}${wantText ? '&format=text' : ''}`, { cache: 'no-store' });
-    const txt = await r.text();
-    return wantText ? res.status(200).send(txt) : res.status(200).json(JSON.parse(txt));
-  }
-
-  // 3) 化妝師（之後接 vendors 表）
-  if (/(化妝師|MUA)/i.test(q)) {
-    const msg = '化妝師查詢準備接 Supabase（下一步）';
+// 只示範紅日分支，放入你現有的 /api/sisi.js 內
+if (/(紅日|公眾假期|通勝|擇日)/.test(q)) {
+  // 取 YYYY-MM-DD
+  const m = q.match(/\d{4}-\d{2}-\d{2}/);
+  if (!m) {
+    const msg = '請講清楚日期，例如「紅日 2025-09-09」';
     return wantText ? res.status(200).send(msg) : res.status(200).json({ ok: true, msg });
   }
+  const date = m[0];
 
-  const msg = '未識別呢個問題，可試：過大禮 / 紅日 2025-09-09 / 搵化妝師';
-  return wantText ? res.status(200).send(msg) : res.status(200).json({ ok: true, msg });
+  // 構造本域名 URL（Vercel 下可靠）
+  const origin = new URL(req.url, `https://${req.headers.host}`).origin;
+  const url = `${origin}/api/lunar?date=${date}${wantText ? '&format=text' : ''}`;
+
+  const r = await fetch(url, { cache: 'no-store' });
+  const text = await r.text();
+
+  // /api/lunar 已經「永不 500」，你可以直接轉發
+  return wantText ? res.status(200).send(text) : res.status(200).json(JSON.parse(text));
 }
