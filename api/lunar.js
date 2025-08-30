@@ -9,69 +9,82 @@ export default async function handler(req, res) {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
     const date = (url.searchParams.get('date') || '').slice(0, 10);
+    const mode = (url.searchParams.get('mode') || '').toLowerCase(); // 'diag' 可見更多
     const wantText =
       (url.searchParams.get('format') || '').toLowerCase() === 'text' ||
       (req.headers.accept || '').includes('text/plain');
-    const diag = url.searchParams.get('diag');
 
-    // 1) env 檢查
+    // 0) env
     if (!SUPA_URL || !SUPA_KEY) {
       const payload = {
-        ok: false,
-        error: 'env-missing',
-        hint: 'SUPABASE_URL / SUPABASE_ANON_KEY is required.',
+        ok: false, error: 'env-missing',
         has_url: !!SUPA_URL, has_key: !!SUPA_KEY
       };
-      return wantText ? res.status(200).send(JSON.stringify(payload, null, 2))
-                      : res.status(200).json(payload);
+      return out(res, payload, wantText);
     }
     if (!date) {
-      const msg = 'date is required (YYYY-MM-DD). 例：/api/lunar?date=2025-09-13&format=text';
-      return wantText ? res.status(200).send(msg) : res.status(200).json({ ok:false, error: msg });
+      return out(res, { ok:false, error: "date is required (YYYY-MM-DD)" }, wantText);
     }
 
-    // 2) 先查當日；無 → 用最近之後一日（全年都有就一定命中）
-    let { data: day, error } = await supa
-      .from('lunar_days')
-      .select('*')
-      .eq('date', date)
-      .maybeSingle();
+    // 1) 表是否存在 + 範圍
+    const meta = {};
+    try {
+      const { data: exists } = await supa.rpc('pg_table_is_visible', { relname: 'lunar_days' }); // 可能在某些環境不可用
+      meta.table_visible = exists ?? null;
+    } catch { meta.table_visible = null; }
 
-    if (!error && !day) {
-      const { data: nextRows, error: nextErr } = await supa
+    const { data: rangeRows, error: rangeErr } = await supa
+      .from('lunar_days')
+      .select('date')
+      .order('date', { ascending: true })
+      .limit(1);
+
+    const { data: rangeRows2 } = await supa
+      .from('lunar_days')
+      .select('date')
+      .order('date', { ascending: false })
+      .limit(1);
+
+    meta.min_date = (rangeRows && rangeRows[0]?.date) || null;
+    meta.max_date = (rangeRows2 && rangeRows2[0]?.date) || null;
+    meta.range_error = rangeErr?.message || null;
+
+    // 2) 查當日
+    let day = null;
+    let errMsg = null;
+
+    const exact = await supa.from('lunar_days').select('*').eq('date', date).maybeSingle();
+    if (exact.error) errMsg = exact.error.message;
+    if (exact.data) day = exact.data;
+
+    // 3) 無 → 查最近之後一日
+    if (!day) {
+      const next = await supa
         .from('lunar_days')
         .select('*')
         .gte('date', date)
         .order('date', { ascending: true })
         .limit(1);
-      if (!nextErr && nextRows && nextRows.length) day = nextRows[0];
+      if (next.error) errMsg = errMsg || next.error.message;
+      if (next.data && next.data.length) day = next.data[0];
     }
 
-    if (diag) {
-      return res.status(200).json({
-        ok: !!day, query_date: date, used_date: day?.date || null,
-        supabase_error: error?.message || null
-      });
+    // 4) 診斷模式
+    if (mode === 'diag') {
+      return out(res, {
+        ok: !!day,
+        query_date: date,
+        used_date: day?.date || null,
+        error: errMsg,
+        meta
+      }, false); // 診斷用 JSON
     }
 
+    // 5) 正常輸出
     if (!day) {
-      const msg = `找不到 ${date} 的通勝記錄。`;
-      return wantText ? res.status(200).send(msg) : res.status(200).json({ ok:true, empty:true, date });
+      return out(res, { ok:true, empty:true, query_date: date, hint:"Check env URL/key & table name." }, wantText);
     }
 
-    // 3) （可選）嘗試取該日的時辰（未入就算，絕不報錯）
-    let hours = [];
-    try {
-      const { data: hrs } = await supa
-        .from('lunar_hours')
-        .select('hour_zhi,slot,time_range,good_for_main,avoid_main,ord')
-        .eq('date', day.date)
-        .order('ord', { ascending: true })
-        .limit(3);
-      hours = Array.isArray(hrs) ? hrs : [];
-    } catch { /* ignore if table not ready */ }
-
-    // 4) 格式化輸出
     if (wantText) {
       const lines = [
         `📅 要求：${date}${day.date !== date ? ` → 使用：${day.date}` : ''}`,
@@ -81,35 +94,22 @@ export default async function handler(req, res) {
         day.star_god ? `星神：${day.star_god}` : '',
         day.good_for_main?.length ? `✅ 宜（主）：${day.good_for_main.join('、')}` : '',
         day.avoid_main?.length ? `⛔ 忌（主）：${day.avoid_main.join('、')}` : '',
-        day.jishen_yiqu_main?.length ? `吉神：${day.jishen_yiqu_main.join('、')}` : '',
-        day.xiongsha_yiji_main?.length ? `凶煞：${day.xiongsha_yiji_main.join('、')}` : '',
-        day.notes ? `備註：${day.notes}` : '',
-        hours.length ? '\n🕒 部分時辰：' : ''
       ].filter(Boolean);
-
-      if (hours.length) {
-        const hourLines = hours.map(h => {
-          const good = (h.good_for_main||[]).join('、') || '—';
-          const avoid = (h.avoid_main||[]).join('、') || '—';
-          return `・${h.time_range}（${h.hour_zhi}${h.slot==='early'?'·初':h.slot==='late'?'·正':''}）｜宜：${good}｜忌：${avoid}`;
-        });
-        lines.push(...hourLines);
-      }
-
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      return res.status(200).send(lines.join('\n'));
+      return out(res, { ok:true, answer: lines.join('\n') }, true);
     }
 
-    // JSON
-    return res.status(200).json({
-      ok: true,
-      query_date: date,
-      used_date: day.date,
-      day,
-      hours_preview: hours
-    });
+    return out(res, { ok:true, query_date: date, used_date: day.date, day }, false);
 
   } catch (e) {
-    return res.status(200).json({ ok:false, fatal: String(e?.stack || e) });
+    return out(res, { ok:false, fatal: String(e) }, false);
   }
+}
+
+function out(res, payload, asText) {
+  if (asText) {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.status(200).send(String(payload.answer || JSON.stringify(payload)));
+  }
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  return res.status(200).json(payload);
 }
