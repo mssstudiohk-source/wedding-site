@@ -1,4 +1,4 @@
-// api/lunar.js
+// api/lunar.js (AI 1.0)
 import { createClient } from '@supabase/supabase-js';
 
 const SUPA_URL = process.env.SUPABASE_URL || '';
